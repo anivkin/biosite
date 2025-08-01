@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<!-- saved from url=(0018)https://anivka.ru/ -->
+<html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aniv@portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./anivka-site_files/css2" rel="stylesheet">
+    <script src="./anivka-site_files/saved_resource"></script>
+    <style>
+        :root {
+            --bg: #1e1e2e; --fg: #cdd6f4; --red: #f38ba8; --green: #a6e3a1; --yellow: #f9e2af; --blue: #89b4fa; --magenta: #f5c2e7; --cyan: #89dceb; --mauve: #cba6f7; --white: #bac2de; --overlay0: #6c7086;
+        }
+        body { background-color: var(--bg); color: var(--fg); font-family: 'Fira Code', monospace; transition: background-color 0.3s, color 0.3s; }
+        #terminal { width: 100%; height: 100vh; padding: 1.25rem; overflow-y: auto; box-sizing: border-box; cursor: text; }
+        #output { white-space: pre-wrap; word-break: break-all; }
+        .output-line { line-height: 1.5; }
+        .output-line a { color: var(--cyan); text-decoration: underline; }
+        .output-line a:hover { color: var(--mauve); }
+        .input-line-container { display: flex; align-items: center; }
+        .prompt { margin-right: 0.5rem; flex-shrink: 0; }
+        #command-input { background: none; border: none; color: var(--fg); font-family: 'Fira Code', monospace; width: 100%; caret-color: var(--fg); outline: none; padding: 0; font-size: 1em; }
+        #cursor { display: inline-block; background-color: var(--bg); width: 8px; height: 1.2em; animation: blink 1s step-end infinite; vertical-align: bottom; margin-left: 2px; }
+        #command-input:focus + #cursor { display: none; }
+        @keyframes blink { from, to { background-color: transparent; } 50% { background-color: var(--fg); } }
+        .text-red { color: var(--red); } .text-green { color: var(--green); } .text-yellow { color: var(--yellow); } .text-blue { color: var(--blue); } .text-magenta { color: var(--magenta); } .text-cyan { color: var(--cyan); } .text-mauve { color: var(--mauve); } .text-white { color: var(--white); } .text-overlay0 { color: var(--overlay0); }
+        .fastfetch-container { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; justify-content: flex-start; }
+        .ascii-art pre { font-size: 0.8em; line-height: 1.1; color: var(--blue); flex-shrink: 0; }
+        .info-block { flex-grow: 1; }
+        #matrix-canvas, #nano-editor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: none; }
+        #matrix-canvas { background: rgba(0, 0, 0, 0.9); }
+        /* FIXED: Removed conflicting 'display: flex' from the base rule. It will now be applied by JS. */
+        #nano-editor { background-color: var(--bg); padding: 1rem; flex-direction: column; }
+        #nano-textarea { width: 100%; height: calc(100% - 3rem); background-color: var(--bg); color: var(--fg); border: 1px solid var(--overlay0); font-family: 'Fira Code', monospace; resize: none; outline: none; }
+        #nano-footer { padding-top: 0.5rem; font-size: 0.9em; color: var(--yellow); }
+        
+        @media (max-width: 768px) {
+            .fastfetch-container { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .ascii-art { display: none; }
+            #terminal { padding: 0.75rem; }
+        }
+        @media (max-width: 1024px) { body, #command-input { font-size: 15px; } }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}</style></head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <div id="nano-editor">
+        <textarea id="nano-textarea"></textarea>
+        <div id="nano-footer">
+            ^S Сохранить | ^Q Выход
+        </div>
+    </div>
+
+    <div id="terminal" onclick="document.getElementById(&#39;command-input&#39;).focus()">
+        <div id="output"><div class="output-line"><div class="fastfetch-container"><div class="ascii-art"><pre>                   -`
+                  .o+`
+                 `ooo/
+                `+oooo:
+               `+oooooo:
+               -+oooooo+:
+             `/:--+oooooo:
+            `/o+o:- `+oooooo:
+           `+o+o+o/-  `o+oooooo:
+          `oo+o+o+o+:`-`+oooooo:
+         `:o+o+o+o+o+:`o+oooooo:
+         `::o+o+o+o+o+o+`+oooooo:
+        `::::o+o+o+o+o+o+`+oooooo:
+       `:::::o+o+o+o+o+o+o`+oooooo:
+      .::::::::o+o+o+o+o+o+`+oooooo:
+     .::::::::::o+o+o+o+o+o+`+oooooo+:
+    `::::::::::::o+o+o+o+o+o+`+oooooo+:`
+   `::::::::::::::o+o+o+o+o+o+`+ooooo+:`
+  `::::::::::::::::o+o+o+o+o+o+`+oooo+:`
+ `::::::::::::::::::o+o+o+o+o+o+`+ooo+:`
+ `::::::::::::::::::o+o+o+o+o+o+o+`+o+:`
+ `:::::::::::::::::::o+o+o+o+o+o+o+`+:`
+ `::::::::::::::::::::o+o+o+o+o+o+o+`
+ `:::::::::::::::::::::o+o+o+o+o+o+`
+  `::::::::::::::::::::::o+o+o+o+o`
+   `:::::::::::::::::::::o+o+o+o`
+    `::::::::::::::::::::o+o+o+`
+      `:::::::::::::::::o+o+`
+        `::::::::::::o+o+`
+           `::::::::o+`
+             `:::::+`</pre></div><div class="info-block"><span class="text-magenta">aniv</span><span class="text-white">@</span><span class="text-magenta">portfolio</span>
+--------------------
+<span class="text-mauve">status:</span>               <span class="text-fg">developer, designer</span>
+<span class="text-mauve">langs:</span>                <span class="text-fg">Russian, English</span>
+<span class="text-mauve">system:</span>               <span class="text-fg">I use Arch btw</span>
+<span class="text-mauve">devices:</span>              <span class="text-fg">veux, PC</span>
+<span class="text-mauve">projects:</span>             <span class="text-fg"><a href="https://anivdev.t.me/" target="_blank" rel="noopener noreferrer">anivdev.t.me</a></span>
+<br>
+<span class="text-mauve">tg:</span>                   <span class="text-fg">@mrsaniv</span>
+<span class="text-mauve">email:</span>                <span class="text-fg"><a href="mailto:anivka@duck.com">anivka@duck.com</a></span></div></div></div><div class="output-line">Добро пожаловать! Введите 'help', чтобы начать.</div></div>
+        <div class="input-line-container">
+            <span class="prompt"><span class="text-magenta">aniv</span><span class="text-white">@</span><span class="text-magenta">portfolio</span><span class="text-white">:</span><span class="text-cyan">~</span>$&nbsp;</span>
+            <input type="text" id="command-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <span id="cursor"></span>
+        </div>
+    </div>
+
+    <script>
+    try {
+        const terminal = document.getElementById('terminal');
+        const output = document.getElementById('output');
+        const input = document.getElementById('command-input');
+        const promptElement = document.querySelector('.prompt');
+        const inputContainer = document.querySelector('.input-line-container');
+
+        let currentPath = '~';
+        const fileSystem = {
+            '~': {
+                'type': 'dir',
+                'children': {
+                    'about_me.txt': { 'type': 'file', 'content': 'Привет! Я aniv, разработчик и дизайнер...\nP.S. Попробуй команду `coffee`, когда устанешь.' },
+                    'contacts.txt': { 'type': 'file', 'content': 'Telegram: @mrsaniv\nEmail: anivka@duck.com\nProjects: anivdev.t.me' },
+                    'themes.txt': { 'type': 'file', 'content': 'Доступные темы: catppuccin, nord, dracula, solarized-dark, solarized-light.\nИспользуйте: theme <название>' },
+                    'notes.txt': { 'type': 'file', 'content': '' },
+                    'projects': { 'type': 'dir', 'children': { 'anivdev.txt': { 'type': 'file', 'content': '...' } } }
+                }
+            }
+        };
+
+        let commandHistory = [];
+        let historyIndex = -1;
+        const aliases = {};
+        
+        function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+        
+        function linkify(text) {
+             const combinedRegex = new RegExp(
+                '([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+)|' +
+                '(\\b(https?|ftp|file):\\/\\/[-A-Z0-9+&@#\\/%?=~_|!:,.;]*[-A-Z0-9+&@#\\/%=~_|])|' +
+                '(\\bwww\\.[-A-Z0-9+&@#\\/%?=~_|!:,.;]*[-A-Z0-9+&@#\\/%=~_|])|' +
+                '(\\b[-A-Z0-9+&@#\\/%=~_|!:,.;]+\\.(com|org|net|me|ru|io|dev|t\\.me)\\b)',
+                'gi'
+            );
+            return text.replace(combinedRegex, (match, email) => {
+                if (email) return `<a href="mailto:${email}">${email}</a>`;
+                let fullUrl = match;
+                if (!/^(https?|ftp|file):\/\//i.test(match)) fullUrl = 'https://' + match;
+                return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${match}</a>`;
+            });
+        }
+
+        function printToTerminal(text, isHtml = false) {
+            const line = document.createElement('div');
+            line.classList.add('output-line');
+            if (isHtml) {
+                line.innerHTML = text; 
+            } else {
+                line.innerHTML = linkify(escapeHtml(text)); 
+            }
+            output.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function resolvePath(path) {
+            const parts = path.replace(/^~\/?/, '').split('/').filter(p => p);
+            let current = fileSystem['~'];
+            for (const part of parts) {
+                if (current && current.type === 'dir' && current.children[part]) {
+                    current = current.children[part];
+                } else { return null; }
+            }
+            return current;
+        }
+        
+        function updatePrompt() {
+            promptElement.innerHTML = `<span class="text-magenta">aniv</span><span class="text-white">@</span><span class="text-magenta">portfolio</span><span class="text-white">:</span><span class="text-cyan">${escapeHtml(currentPath)}</span>$&nbsp;`;
+        }
+        
+        const quotes = [
+            "Любой дурак может написать код, понятный компьютеру. Хорошие программисты пишут код, понятный человеку. - Мартин Фаулер",
+            "Сначала заставьте это работать, потом сделайте это правильно, а затем — быстро. - Кент Бек",
+            "I use Arch btw."
+        ];
+        const themes = {
+            'catppuccin': { '--bg': '#1e1e2e', '--fg': '#cdd6f4', '--red': '#f38ba8', '--green': '#a6e3a1', '--yellow': '#f9e2af', '--blue': '#89b4fa', '--magenta': '#f5c2e7', '--cyan': '#89dceb', '--mauve': '#cba6f7', '--white': '#bac2de', '--overlay0': '#6c7086' },
+            'dracula': { '--bg': '#282a36', '--fg': '#f8f8f2', '--red': '#ff5555', '--green': '#50fa7b', '--yellow': '#f1fa8c', '--blue': '#bd93f9', '--magenta': '#ff79c6', '--cyan': '#8be9fd', '--mauve': '#bd93f9', '--white': '#f8f8f2', '--overlay0': '#6272a4' },
+            'nord': { '--bg': '#2E3440', '--fg': '#D8DEE9', '--red': '#BF616A', '--green': '#A3BE8C', '--yellow': '#EBCB8B', '--blue': '#81A1C1', '--magenta': '#B48EAD', '--cyan': '#88C0D0', '--mauve': '#B48EAD', '--white': '#E5E9F0', '--overlay0': '#4C566A' },
+            'solarized-dark': { '--bg': '#002b36', '--fg': '#839496', '--red': '#dc322f', '--green': '#859900', '--yellow': '#b58900', '--blue': '#268bd2', '--magenta': '#d33682', '--cyan': '#2aa198', '--mauve': '#6c71c4', '--white': '#eee8d5', '--overlay0': '#586e75' },
+            'solarized-light': { '--bg': '#fdf6e3', '--fg': '#657b83', '--red': '#dc322f', '--green': '#859900', '--yellow': '#b58900', '--blue': '#268bd2', '--magenta': '#d33682', '--cyan': '#2aa198', '--mauve': '#6c71c4', '--white': '#073642', '--overlay0': '#93a1a1' }
+        };
+
+        function applyTheme(themeName) {
+            const theme = themes[themeName];
+            if (!theme) return false;
+            for (const [key, value] of Object.entries(theme)) {
+                document.documentElement.style.setProperty(key, value);
+            }
+            return true;
+        }
+
+        let matrixAnimationId;
+        function runMatrix() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            inputContainer.style.display = 'none';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const alphabet = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const rainDrops = Array.from({ length: columns }).map(() => 1);
+            const draw = () => {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--green');
+                ctx.font = fontSize + 'px monospace';
+                for (let i = 0; i < rainDrops.length; i++) {
+                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                    if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) { rainDrops[i] = 0; }
+                    rainDrops[i]++;
+                }
+            };
+            matrixAnimationId = setInterval(draw, 30);
+            window.addEventListener('keydown', stopMatrix, { once: true });
+            window.addEventListener('click', stopMatrix, { once: true });
+        }
+
+        function stopMatrix() {
+            clearInterval(matrixAnimationId);
+            const canvas = document.getElementById('matrix-canvas');
+            canvas.style.display = 'none';
+            inputContainer.style.display = 'flex';
+            input.focus();
+            window.removeEventListener('keydown', stopMatrix);
+            window.removeEventListener('click', stopMatrix);
+        }
+
+        function cowsay(text) {
+             const lines = text.split('\n');
+             const maxLength = Math.max(...lines.map(line => line.length));
+             const topBorder = ' ' + '_'.repeat(maxLength + 2);
+             const bottomBorder = ' ' + '-'.repeat(maxLength + 2);
+             let bubble = lines.map((line, index) => {
+                 const padding = ' '.repeat(maxLength - line.length);
+                 if (lines.length === 1) return `< ${line}${padding} >`;
+                 if (index === 0) return `/ ${line}${padding} \\`;
+                 if (index === lines.length - 1) return `\\ ${line}${padding} /`;
+                 return `| ${line}${padding} |`;
+             }).join('\n');
+             const cow = [
+                "        \\   ^__^",
+                "         \\  (oo)\\_______",
+                "            (__)\\       )\\/\\",
+                "                ||----w |",
+                "                ||     ||"
+             ].join('\n');
+            return `<pre>${topBorder}\n${bubble}\n${bottomBorder}\n${cow}</pre>`;
+        }
+        
+        const commands = {
+            'fastfetch': () => {
+                const asciiArt = [
+                    '                   -\`', '                  .o+\`', '                 \`ooo/', '                \`+oooo:', '               \`+oooooo:', '               -+oooooo+:', '             \`/:--+oooooo:', '            \`/o+o:- \`+oooooo:', '           \`+o+o+o/-  \`o+oooooo:', '          \`oo+o+o+o+:\`-\`+oooooo:', '         \`:o+o+o+o+o+:\`o+oooooo:', '         \`::o+o+o+o+o+o+\`+oooooo:', '        \`::::o+o+o+o+o+o+\`+oooooo:', '       \`:::::o+o+o+o+o+o+o\`+oooooo:', '      .::::::::o+o+o+o+o+o+\`+oooooo:', '     .::::::::::o+o+o+o+o+o+\`+oooooo+:', '    \`::::::::::::o+o+o+o+o+o+\`+oooooo+:\`', '   \`::::::::::::::o+o+o+o+o+o+\`+ooooo+:\`', '  \`::::::::::::::::o+o+o+o+o+o+\`+oooo+:\`', ' \`::::::::::::::::::o+o+o+o+o+o+\`+ooo+:\`', ' \`::::::::::::::::::o+o+o+o+o+o+o+\`+o+:\`', ' \`:::::::::::::::::::o+o+o+o+o+o+o+\`+:\`', ' \`::::::::::::::::::::o+o+o+o+o+o+o+\`', ' \`:::::::::::::::::::::o+o+o+o+o+o+\`', '  \`::::::::::::::::::::::o+o+o+o+o\`', '   \`:::::::::::::::::::::o+o+o+o\`', '    \`::::::::::::::::::::o+o+o+\`', '      \`:::::::::::::::::o+o+\`', '        \`::::::::::::o+o+\`', '           \`::::::::o+\`', '             \`:::::+\`'
+                ].join('\n');
+                const info = `<span class="text-magenta">aniv</span><span class="text-white">@</span><span class="text-magenta">portfolio</span>\n--------------------\n<span class="text-mauve">status:</span>               <span class="text-fg">developer, designer</span>\n<span class="text-mauve">langs:</span>                <span class="text-fg">Russian, English</span>\n<span class="text-mauve">system:</span>               <span class="text-fg">I use Arch btw</span>\n<span class="text-mauve">devices:</span>              <span class="text-fg">veux, PC</span>\n<span class="text-mauve">projects:</span>             <span class="text-fg"><a href="https://anivdev.t.me" target="_blank" rel="noopener noreferrer">anivdev.t.me</a></span>\n<br>\n<span class="text-mauve">tg:</span>                   <span class="text-fg">@mrsaniv</span>\n<span class="text-mauve">email:</span>                <span class="text-fg"><a href="mailto:anivka@duck.com">anivka@duck.com</a></span>`;
+                const content = `<div class="fastfetch-container"><div class="ascii-art"><pre>${escapeHtml(asciiArt)}</pre></div><div class="info-block">${info}</div></div>`;
+                printToTerminal(content, true);
+            },
+            'help': () => {
+                const helpText = [
+                    '<span class="text-yellow">Доступные команды:</span>',
+                    '  <span class="text-green">fastfetch</span>     - Показать информацию о системе.',
+                    '  <span class="text-green">help</span>          - Показать это сообщение.',
+                    '  <span class="text-green">ls, cd, cat</span>   - Навигация по файловой системе.',
+                    '  <span class="text-green">echo, clear</span>   - Основные утилиты терминала.',
+                    '  <span class="text-green">date, history</span> - Показать дату или историю команд.',
+                    '  <span class="text-green">motd, uname</span>   - Показать сообщение дня или "систему".',
+                    '  <span class="text-green">cowsay, matrix</span>- Забавные команды.',
+                    '  <span class="text-green">theme</span>         - Сменить цветовую схему.',
+                    '  <span class="text-green">calc</span>          - Простой калькулятор.',
+                    '  <span class="text-green">ps</span>            - Показать фейковые процессы.',
+                    '  <span class="text-green">nano</span>          - Простой текстовый редактор.',
+                    '  <span class="text-green">sudo, rm</span>      - Команды суперпользователя.',
+                    '  <span class="text-green">weather</span>       - Показать погоду.',
+                    '  <span class="text-green">note</span>          - Простой блокнот.',
+                    '  <span class="text-green">alias</span>         - Создать псевдоним.'
+                ].join('\n');
+                printToTerminal(helpText, true); 
+            },
+            'man': (args) => commands['help'](args),
+            'clear': () => { output.innerHTML = ''; },
+            'echo': (args) => { printToTerminal(args.join(' ')); },
+            'ls': (args) => {
+                const node = resolvePath(args[0] || currentPath);
+                if (node && node.type === 'dir') {
+                    let listing = Object.keys(node.children).map(key => node.children[key].type === 'dir' ? `<span class="text-cyan">${key}/</span>` : `<span>${key}</span>`).join('  ');
+                    printToTerminal(listing, true);
+                } else {
+                    printToTerminal(`<span class="text-red">ls: ${escapeHtml(args[0] || currentPath)}: Не является директорией</span>`, true);
+                }
+            },
+            'cd': (args) => {
+                let targetPath = args[0];
+                if (!targetPath) { targetPath = '~'; }
+                if (targetPath === '.') return;
+                let newPath;
+                if (targetPath === '~' || targetPath.startsWith('~/')) { newPath = targetPath; } 
+                else if (targetPath === '..') {
+                    if (currentPath === '~') return;
+                    const parts = currentPath.split('/');
+                    parts.pop();
+                    newPath = parts.length === 1 ? '~' : parts.join('/');
+                } else {
+                    newPath = (currentPath === '~' ? '~/': `${currentPath}/`) + targetPath;
+                }
+                const dir = resolvePath(newPath);
+                if (dir && dir.type === 'dir') {
+                    currentPath = newPath.replace(/\/$/, "");
+                    if (currentPath === '') currentPath = '~';
+                    updatePrompt();
+                } else {
+                    printToTerminal(`<span class="text-red">cd: ${escapeHtml(targetPath)}: Нет такого файла или директории</span>`, true);
+                }
+            },
+            'cat': (args) => {
+                 const fileName = args[0];
+                 if (!fileName) return;
+                 const path = fileName.startsWith('~/') ? fileName : (currentPath === '~' ? `~/${fileName}` : `${currentPath}/${fileName}`);
+                 const file = resolvePath(path);
+                 if (file && file.type === 'file') { printToTerminal(file.content); } 
+                 else if (file && file.type === 'dir') { printToTerminal(`<span class="text-red">cat: ${escapeHtml(fileName)}: Это директория</span>`, true); } 
+                 else { printToTerminal(`<span class="text-red">cat: ${escapeHtml(fileName)}: Нет такого файла</span>`, true); }
+            },
+            'date': () => { printToTerminal(new Date().toLocaleString('ru-RU', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })); },
+            'history': () => { printToTerminal(commandHistory.map((cmd, i) => ` ${i+1}  ${escapeHtml(cmd)}`).join('\n')); },
+            'motd': () => { printToTerminal(quotes[Math.floor(Math.random() * quotes.length)]); },
+            'uname': () => { printToTerminal('Linux aniv-portfolio 6.9-arch1-1 #IUseArchBTW x86_64 GNU/Linux'); },
+            'cowsay': (args) => {
+                if (args.length === 0) { printToTerminal('<span class="text-yellow">Что должна сказать корова? `cowsay "привет"`</span>', true); return; }
+                printToTerminal(cowsay(args.join(' ')), true);
+            },
+            'theme': (args) => {
+                const themeName = args[0];
+                if (!themeName) { printToTerminal(`<span class="text-yellow">Использование: theme [название]. Доступные темы: ${Object.keys(themes).join(', ')}</span>`, true); return; }
+                if (applyTheme(themeName)) { printToTerminal(`Тема изменена на: <span class="text-green">${themeName}</span>`, true); } 
+                else { printToTerminal(`<span class="text-red">Тема '${escapeHtml(themeName)}' не найдена.</span>`, true); }
+            },
+            'matrix': () => {
+                printToTerminal('Вход в матрицу... Нажмите любую клавишу для выхода.');
+                setTimeout(runMatrix, 300);
+            },
+            'coffee': () => {
+                const coffeeArt = [
+                    "      .----------------.  ",
+                    "     |                |  ",
+                    "     |                |  ",
+                    "     |     aniv.      |___",
+                    "     |                |   |",
+                    "     |                |   |",
+                    "      `----------------'--'",
+                    "            | | |",
+                    "            | | |",
+                    "           `---' "
+                ].join('\n');
+                printToTerminal(`<pre>${coffeeArt}</pre>`, true);
+            },
+            'ps': () => {
+                const processes = [
+                    " PID TTY          TIME CMD",
+                    "1001 pts/0    00:00:01 zsh",
+                    "1025 pts/0    00:00:00 portfolio-server",
+                    "1150 pts/0    00:00:12 coffee-daemon",
+                    "1151 pts/0    00:00:00 sleep 1d"
+                ].join('\n');
+                printToTerminal(processes);
+            },
+            'calc': (args) => {
+                const expression = args.join(' ');
+                if (!expression) { printToTerminal('<span class="text-yellow">Укажите выражение для вычисления.</span>', true); return; }
+                try {
+                    const result = new Function('return ' + expression.replace(/[^-()\d/*+.]/g, ''))();
+                    printToTerminal(`> ${result}`);
+                } catch(e) {
+                    printToTerminal(`<span class="text-red">Некорректное выражение.</span>`, true);
+                }
+            },
+            'nano': (args) => {
+                const fileName = args[0];
+                if (!fileName) { printToTerminal(`<span class="text-yellow">Укажите имя файла для редактирования.</span>`, true); return; }
+                
+                const file = resolvePath(fileName);
+                if (!file || file.type !== 'file') {
+                    printToTerminal(`<span class="text-red">Файл не найден или это не файл: ${escapeHtml(fileName)}</span>`, true);
+                    return;
+                }
+
+                const editor = document.getElementById('nano-editor');
+                const textarea = document.getElementById('nano-textarea');
+                
+                textarea.value = file.content;
+                editor.style.display = 'flex';
+                textarea.focus();
+                
+                const nanoKeydownHandler = (e) => {
+                    if (e.ctrlKey) {
+                        if (e.key === 's') { 
+                            e.preventDefault();
+                            file.content = textarea.value;
+                            document.getElementById('nano-footer').textContent = "Файл сохранен! | ^Q Выход";
+                        } else if (e.key === 'q') {
+                            e.preventDefault();
+                            editor.style.display = 'none';
+                            document.getElementById('nano-footer').textContent = "^S Сохранить | ^Q Выход";
+                            window.removeEventListener('keydown', nanoKeydownHandler);
+                            input.focus();
+                        }
+                    }
+                };
+                window.addEventListener('keydown', nanoKeydownHandler);
+            },
+            'sudo': async (args) => {
+                if (args.length === 0) {
+                    printToTerminal('sudo: укажите команду');
+                    return;
+                }
+                
+                printToTerminal('[sudo] password for aniv: ', false);
+                inputContainer.style.display = 'none';
+
+                const passwordInput = document.createElement('input');
+                passwordInput.type = 'password';
+                passwordInput.id = 'password-input';
+                passwordInput.className = 'bg-transparent border-none text-white font-mono w-full outline-none';
+                output.appendChild(passwordInput);
+                passwordInput.focus();
+
+                passwordInput.addEventListener('keydown', async (e) => {
+                    if (e.key === 'Enter') {
+                        const password = passwordInput.value;
+                        passwordInput.remove();
+                        inputContainer.style.display = 'flex';
+                        input.focus();
+                        
+                        if (password === '228307') {
+                            const [command, ...commandArgs] = args;
+                            if (commands[command]) {
+                                await commands[command](commandArgs, true); 
+                            } else {
+                                printToTerminal(`sudo: ${escapeHtml(command)}: команда не найдена`);
+                            }
+                        } else {
+                            printToTerminal('sudo: неверный пароль');
+                        }
+                    }
+                });
+            },
+            'rm': (args, isSudo = false) => {
+                if (args.join(' ') === '-rf /*' && isSudo) {
+                    output.innerHTML = '';
+                    printToTerminal('[  0.000001] Kernel panic - not syncing: Attempted to kill init!', true);
+                    inputContainer.style.display = 'none';
+                    return;
+                }
+
+                if (!isSudo) {
+                    printToTerminal('rm: для этой операции требуются права суперпользователя.');
+                    return;
+                }
+
+                const fileName = args[0];
+                if (!fileName) {
+                    printToTerminal('rm: не указан операнд файла');
+                    return;
+                }
+                
+                const pathParts = currentPath.replace(/^~\/?/, '').split('/').filter(Boolean);
+                let currentDir = fileSystem['~'];
+                pathParts.forEach(part => {
+                    currentDir = currentDir.children[part];
+                });
+
+                if (currentDir && currentDir.children && currentDir.children[fileName]) {
+                    delete currentDir.children[fileName];
+                    printToTerminal(`Файл '${escapeHtml(fileName)}' удален.`);
+                } else {
+                    printToTerminal(`rm: невозможно удалить '${escapeHtml(fileName)}': Нет такого файла или каталога`);
+                }
+            },
+             'weather': async (args) => {
+                const city = args.join(' ') || 'Moscow';
+                printToTerminal(`Получение погоды для города: ${escapeHtml(city)}...`);
+                try {
+                    const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=ru&format=json`);
+                    if (!geoResponse.ok) throw new Error('Ошибка сети при поиске города.');
+                    const geoData = await geoResponse.json();
+                    if (!geoData.results || geoData.results.length === 0) {
+                        printToTerminal(`<span class="text-red">Город '${escapeHtml(city)}' не найден.</span>`, true);
+                        return;
+                    }
+                    const { latitude, longitude, name } = geoData.results[0];
+                    const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+                    if (!weatherResponse.ok) throw new Error('Ошибка сети при получении погоды.');
+                    const weatherData = await weatherResponse.json();
+                    const temp = weatherData.current_weather.temperature;
+                    const weatherCode = weatherData.current_weather.weathercode;
+                    const weatherIcons = { 0: '', 1: '', 2: '', 3: '', 45: '', 48: '', 51: '', 53: '', 55: '', 61: '', 63: '', 65: '', 80: '', 81: '', 82: '', 95: '' };
+                    const icon = weatherIcons[weatherCode] || '';
+                    printToTerminal(`Погода в <span class="text-yellow">${name}</span>: <span class="text-cyan">${temp}°C</span> ${icon}`, true);
+                } catch (error) {
+                    printToTerminal(`<span class="text-red">Ошибка: ${error.message}</span>`, true);
+                    console.error(error);
+                }
+            },
+            'note': (args) => {
+                const action = args[0];
+                const text = args.slice(1).join(' ');
+                const noteFile = fileSystem['~'].children['notes.txt'];
+                switch(action) {
+                    case 'save':
+                        if (!text) { printToTerminal('<span class="text-yellow">Что сохранить? `note save Привет, мир`</span>', true); return; }
+                        noteFile.content += (noteFile.content ? '\n' : '') + text;
+                        printToTerminal('Заметка сохранена.');
+                        break;
+                    case 'view':
+                        printToTerminal('<span class="text-yellow">--- Ваши заметки ---</span>', true);
+                        if (noteFile.content) {
+                            printToTerminal(noteFile.content);
+                        } else {
+                            printToTerminal('(пусто)');
+                        }
+                        break;
+                    case 'clear':
+                        noteFile.content = '';
+                        printToTerminal('Заметки очищены.');
+                        break;
+                    default:
+                        printToTerminal('<span class="text-yellow">Использование: note [save|view|clear] [текст]</span>', true);
+                }
+            },
+            'alias': (args) => {
+                if (args.length === 0) {
+                    if (Object.keys(aliases).length === 0) {
+                        printToTerminal('Нет активных псевдонимов.');
+                        return;
+                    }
+                    let output = '';
+                    for (const [name, command] of Object.entries(aliases)) {
+                        output += `alias ${name}='${command}'\n`;
+                    }
+                    printToTerminal(output.trim());
+                    return;
+                }
+                const aliasString = args.join(' ');
+                const match = aliasString.match(/^([^=]+)='([^']*)'$/);
+                if (!match) {
+                    printToTerminal("<span class='text-red'>Неверный формат. Используйте: alias имя='команда'</span>", true);
+                    return;
+                }
+                const [, name, command] = match;
+                aliases[name] = command;
+                printToTerminal(`Псевдоним '${name}' создан.`);
+            },
+            'unalias': (args) => {
+                const name = args[0];
+                if (!name) { printToTerminal("<span class='text-red'>Укажите имя псевдонима для удаления.</span>", true); return; }
+                if (aliases[name]) {
+                    delete aliases[name];
+                    printToTerminal(`Псевдоним '${name}' удален.`);
+                } else {
+                    printToTerminal(`<span class='text-red'>Псевдоним '${name}' не найден.</span>`, true);
+                }
+            }
+        };
+
+        async function handleCommand() {
+            let commandText = input.value.trim();
+            if (commandText === '') return;
+            printToTerminal(`${promptElement.innerHTML}${escapeHtml(commandText)}`, true);
+            commandHistory.unshift(commandText);
+            historyIndex = -1;
+            input.value = '';
+            
+            let [command, ...args] = commandText.split(/\s+/);
+
+            if (aliases[command]) {
+                const aliasedCommand = aliases[command];
+                const aliasedParts = aliasedCommand.split(/\s+/);
+                command = aliasedParts[0];
+                args = [...aliasedParts.slice(1), ...args]; 
+            }
+            
+            if (commands[command]) {
+                await commands[command](args);
+            } else {
+                printToTerminal(`<span class="text-red">Команда не найдена: ${escapeHtml(command)}.</span><span class="text-white"> Введите 'help' для списка команд.</span>`, true);
+            }
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); handleCommand(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); if (historyIndex < commandHistory.length - 1) { historyIndex++; input.value = commandHistory[historyIndex]; }}
+            else if (e.key === 'ArrowDown') { e.preventDefault(); if (historyIndex > 0) { historyIndex--; input.value = commandHistory[historyIndex]; } else { historyIndex = -1; input.value = ''; }}
+            else if (e.key === 'Tab') { e.preventDefault(); }
+        });
+
+        function init() {
+            updatePrompt();
+            commands['fastfetch']();
+            printToTerminal("Добро пожаловать! Введите 'help', чтобы начать.");
+            input.focus();
+        }
+
+        init();
+    } catch (e) {
+        const output = document.getElementById('output');
+        if (output) {
+            output.innerHTML = '<div class="output-line" style="color: #f38ba8;">КРИТИЧЕСКАЯ ОШИБКА: Не удалось запустить терминал.</div>';
+            output.innerHTML += '<div class="output-line" style="color: #f9e2af;">Сообщение: ' + e.message + '</div>';
+            output.innerHTML += '<div class="output-line" style="color: #6c7086;">Стек: ' + e.stack + '</div>';
+        }
+        console.error("Critical error on init:", e);
+    }
+    </script>
+
+
+</body></html>
